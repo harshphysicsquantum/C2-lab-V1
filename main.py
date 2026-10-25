@@ -1,5 +1,5 @@
 import database
-import executor
+import agent
 database.init_db()
 
 
@@ -31,20 +31,29 @@ while True:
             for task in pending_task:
                 print(f"Task ID: {task[0]} | Type: {task[1]} | Status: {task[2]} | Created: {task[3]}")
 
+    
     elif choice == '3':
-        print("Processing next data")
+        print("Processing next task")
         next_pending_task = database.get_next_pending_task()
+
         if not next_pending_task:
             print("No pending tasks.")
         else:
             print(f"Task ID: {next_pending_task[0]} | Type: {next_pending_task[1]} | Status: {next_pending_task[2]} | Created: {next_pending_task[3]}")
+
             database.update_task_status(next_pending_task[0], "running")
-            result = executor.execute_task(next_pending_task[1])
-            if result is not None:
-                print("Task result:", result)       
-                database.update_task_status(next_pending_task[0], "completed")
-            else:
-                print("Task failed")
+
+            try:
+                task_id, result = agent.process_task(next_pending_task)
+                if result is not None:
+                    print("Task result:", result)
+                    database.update_task_status(task_id, "completed")
+                else:
+                    print("Task failed")
+                    database.update_task_status(task_id, "failed")
+                
+            except Exception as e:
+                print(f"something went wrong: {e}")
                 database.update_task_status(next_pending_task[0], "failed")
                 
     elif choice == '4':

@@ -16,6 +16,8 @@ print("Current task:", database.get_task_by_id(task_id))
 print("\nTest 3: completed -> running")
 database.update_task_status(task_id, "running")
 print("Current task:", database.get_task_by_id(task_id))
+assert database.get_task_by_id(task_id)[2] == "completed"
+print("Test 3 passed: invalid transition rejected")
 
 print("\nTest 4: nonexistent task")
 database.update_task_status(999999, "running")
